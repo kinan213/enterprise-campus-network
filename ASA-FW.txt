@@ -1,0 +1,37 @@
+! ASA-FW - Cisco ASA 5506-X - Firewall between the internal network and the DMZ
+! Enable password removed from this file for security.
+configure terminal
+hostname ASA-FW
+interface GigabitEthernet1/1
+ nameif inside
+ security-level 100
+ ip address 10.0.0.14 255.255.255.252
+ no shutdown
+interface GigabitEthernet1/2
+ nameif dmz
+ security-level 50
+ ip address 172.16.1.1 255.255.255.0
+ no shutdown
+route inside 192.168.0.0 255.255.0.0 10.0.0.13
+route inside 10.0.0.0 255.255.255.0 10.0.0.13
+! Inside -> DMZ: only DNS, SMTP, POP3, and ping are allowed (least privilege)
+access-list INSIDE_IN extended permit udp any host 172.16.1.10 eq domain
+access-list INSIDE_IN extended permit tcp any host 172.16.1.12 eq smtp
+access-list INSIDE_IN extended permit tcp any host 172.16.1.12 eq pop3
+access-list INSIDE_IN extended permit icmp any 172.16.1.0 255.255.255.0
+access-list INSIDE_IN extended permit icmp any host 10.0.0.14
+access-group INSIDE_IN in interface inside
+! DMZ -> inside: only replies from the allowed services (DMZ cannot initiate connections)
+access-list DMZ_IN extended permit icmp any any echo-reply
+access-list DMZ_IN extended permit udp host 172.16.1.10 eq domain any
+access-list DMZ_IN extended permit tcp host 172.16.1.12 eq smtp any
+access-list DMZ_IN extended permit tcp host 172.16.1.12 eq pop3 any
+access-group DMZ_IN in interface dmz
+class-map inspection_default
+ match default-inspection-traffic
+policy-map global_policy
+ class inspection_default
+  inspect icmp
+service-policy global_policy global
+end
+write memory

@@ -1,0 +1,36 @@
+! R-BRANCH - Cisco 2911 - Branch router (OSPF Area 0/2 ABR, router-on-a-stick, DHCP relay)
+enable
+configure terminal
+hostname R-BRANCH
+interface GigabitEthernet0/0
+ ip address 10.0.0.6 255.255.255.252
+ no shutdown
+interface GigabitEthernet0/1
+ ip address 10.0.0.10 255.255.255.252
+ no shutdown
+interface GigabitEthernet0/2
+ no shutdown
+interface GigabitEthernet0/2.40
+ encapsulation dot1Q 40
+ ip address 192.168.40.1 255.255.255.0
+ ip helper-address 10.0.0.5
+interface GigabitEthernet0/2.50
+ encapsulation dot1Q 50
+ ip address 192.168.50.1 255.255.255.0
+ ip helper-address 10.0.0.5
+interface GigabitEthernet0/2.60
+ encapsulation dot1Q 60
+ ip address 192.168.60.1 255.255.255.0
+ ip helper-address 10.0.0.5
+router ospf 1
+ router-id 3.3.3.3
+ network 10.0.0.4 0.0.0.3 area 0
+ network 10.0.0.8 0.0.0.3 area 0
+ network 192.168.40.0 0.0.0.255 area 2
+ network 192.168.50.0 0.0.0.255 area 2
+ network 192.168.60.0 0.0.0.255 area 2
+ passive-interface GigabitEthernet0/2.40
+ passive-interface GigabitEthernet0/2.50
+ passive-interface GigabitEthernet0/2.60
+end
+write memory

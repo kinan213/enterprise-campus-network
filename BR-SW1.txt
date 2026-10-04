@@ -1,0 +1,29 @@
+! BR-SW1 - Cisco 2960 - Branch access switch
+enable
+configure terminal
+hostname BR-SW1
+vlan 40
+ name MARKETING
+vlan 50
+ name SUPPORT
+vlan 60
+ name ADMIN
+interface GigabitEthernet0/1
+ switchport mode trunk
+ switchport trunk allowed vlan 40,50,60
+interface FastEthernet0/1
+ switchport mode access
+ switchport access vlan 40
+ spanning-tree portfast
+interface FastEthernet0/2
+ switchport mode access
+ switchport access vlan 50
+ spanning-tree portfast
+interface FastEthernet0/3
+ switchport mode access
+ switchport access vlan 60
+ spanning-tree portfast
+interface range FastEthernet0/4 - 24
+ shutdown
+end
+write memory

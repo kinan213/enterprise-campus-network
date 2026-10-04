@@ -1,0 +1,17 @@
+! DMZ-SW - Cisco 2960 - DMZ switch
+enable
+configure terminal
+hostname DMZ-SW
+vlan 100
+ name DMZ
+interface range FastEthernet0/1 - 2
+ switchport mode access
+ switchport access vlan 100
+ spanning-tree portfast
+interface GigabitEthernet0/1
+ switchport mode access
+ switchport access vlan 100
+interface range FastEthernet0/3 - 24
+ shutdown
+end
+write memory

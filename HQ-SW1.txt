@@ -1,0 +1,32 @@
+! HQ-SW1 - Cisco 2960 - HQ access switch (HR VLAN + voice VLAN)
+enable
+configure terminal
+hostname HQ-SW1
+spanning-tree mode rapid-pvst
+vlan 10
+ name HR
+vlan 20
+ name OFFICE
+vlan 30
+ name VOICE
+vlan 99
+ name MANAGEMENT
+vlan 999
+ name NATIVE-UNUSED
+interface range GigabitEthernet0/1 - 2
+ switchport mode trunk
+ switchport trunk native vlan 999
+ switchport trunk allowed vlan 10,20,30,99
+interface range FastEthernet0/1 - 2
+ switchport mode access
+ switchport access vlan 10
+ spanning-tree portfast
+interface FastEthernet0/3
+ switchport mode access
+ switchport access vlan 10
+ switchport voice vlan 30
+ spanning-tree portfast
+interface range FastEthernet0/4 - 24
+ shutdown
+end
+write memory

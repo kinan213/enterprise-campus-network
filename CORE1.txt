@@ -1,0 +1,105 @@
+! CORE1 - Cisco 3650-24PS - Core switch (OSPF Area 0/1 ABR, HSRP active VLAN 10/20, DHCP server)
+enable
+configure terminal
+hostname CORE1
+ip routing
+spanning-tree mode rapid-pvst
+vlan 10
+ name HR
+vlan 20
+ name OFFICE
+vlan 30
+ name VOICE
+vlan 99
+ name MANAGEMENT
+vlan 900
+ name CORE-TRANSIT
+vlan 999
+ name NATIVE-UNUSED
+spanning-tree vlan 10,20 root primary
+spanning-tree vlan 30,99 root secondary
+interface range GigabitEthernet1/0/23 - 24
+ switchport mode trunk
+ switchport trunk native vlan 999
+ switchport trunk allowed vlan 10,20,30,99,900
+ channel-group 1 mode active
+interface Port-channel1
+ switchport mode trunk
+ switchport trunk native vlan 999
+ switchport trunk allowed vlan 10,20,30,99,900
+interface range GigabitEthernet1/0/1 - 2
+ switchport mode trunk
+ switchport trunk native vlan 999
+ switchport trunk allowed vlan 10,20,30,99
+interface Vlan10
+ ip address 192.168.10.2 255.255.255.0
+ standby 10 ip 192.168.10.1
+ standby 10 priority 110
+ standby 10 preempt
+interface Vlan20
+ ip address 192.168.20.2 255.255.255.0
+ standby 20 ip 192.168.20.1
+ standby 20 priority 110
+ standby 20 preempt
+interface Vlan30
+ ip address 192.168.30.2 255.255.255.0
+ standby 30 ip 192.168.30.1
+ standby 30 preempt
+interface Vlan99
+ ip address 192.168.99.2 255.255.255.0
+ standby 99 ip 192.168.99.1
+ standby 99 preempt
+interface Vlan900
+ ip address 10.0.0.17 255.255.255.252
+interface GigabitEthernet1/0/3
+ no switchport
+ ip address 10.0.0.5 255.255.255.252
+interface GigabitEthernet1/0/4
+ no switchport
+ ip address 10.0.0.13 255.255.255.252
+ip route 172.16.1.0 255.255.255.0 10.0.0.14
+router ospf 1
+ router-id 1.1.1.1
+ network 10.0.0.4 0.0.0.3 area 0
+ network 10.0.0.16 0.0.0.3 area 0
+ network 192.168.10.0 0.0.0.255 area 1
+ network 192.168.20.0 0.0.0.255 area 1
+ network 192.168.30.0 0.0.0.255 area 1
+ network 192.168.99.0 0.0.0.255 area 1
+ passive-interface Vlan10
+ passive-interface Vlan20
+ passive-interface Vlan30
+ passive-interface Vlan99
+ redistribute static subnets
+ip dhcp excluded-address 192.168.10.1 192.168.10.99
+ip dhcp excluded-address 192.168.20.1 192.168.20.99
+ip dhcp excluded-address 192.168.30.1 192.168.30.99
+ip dhcp excluded-address 192.168.40.1 192.168.40.99
+ip dhcp excluded-address 192.168.50.1 192.168.50.99
+ip dhcp excluded-address 192.168.60.1 192.168.60.99
+ip dhcp pool HR
+ network 192.168.10.0 255.255.255.0
+ default-router 192.168.10.1
+ dns-server 172.16.1.10
+ip dhcp pool OFFICE
+ network 192.168.20.0 255.255.255.0
+ default-router 192.168.20.1
+ dns-server 172.16.1.10
+ip dhcp pool VOICE
+ network 192.168.30.0 255.255.255.0
+ default-router 192.168.30.1
+ dns-server 172.16.1.10
+ip dhcp pool MARKETING
+ network 192.168.40.0 255.255.255.0
+ default-router 192.168.40.1
+ dns-server 172.16.1.10
+ip dhcp pool SUPPORT
+ network 192.168.50.0 255.255.255.0
+ default-router 192.168.50.1
+ dns-server 172.16.1.10
+ip dhcp pool ADMIN
+ network 192.168.60.0 255.255.255.0
+ default-router 192.168.60.1
+ dns-server 172.16.1.10
+end
+write memory
